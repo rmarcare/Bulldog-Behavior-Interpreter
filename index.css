@@ -68,7 +68,41 @@ body {
   color: var(--secondary-color);
 }
 
-.upload-section .upload-area {
+/* --- Mode Switcher --- */
+.mode-switcher {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+  background-color: #2a2a2a;
+  border-radius: var(--border-radius);
+  padding: 4px;
+}
+
+.mode-switcher button {
+  flex: 1;
+  padding: 0.5rem;
+  border: none;
+  background-color: transparent;
+  color: var(--on-surface-color);
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.mode-switcher button.active {
+  background-color: var(--primary-color);
+  color: #000;
+}
+
+
+/* --- Upload & Capture --- */
+.upload-section input[type="file"] {
+  display: none;
+}
+
+.upload-area {
   border: 2px dashed #444;
   border-radius: var(--border-radius);
   padding: 2rem;
@@ -79,18 +113,15 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 150px;
+  margin-bottom: 1rem;
 }
 
-.upload-section .upload-area:hover {
+.upload-area:hover {
   background-color: #252525;
   border-color: var(--primary-color);
 }
 
-.upload-section input[type="file"] {
-  display: none;
-}
-
-.upload-section .upload-instructions {
+.upload-instructions {
   color: var(--on-surface-color);
 }
 
@@ -99,6 +130,27 @@ body {
   max-width: 100%;
   max-height: 300px;
   border-radius: var(--border-radius);
+}
+
+.live-capture-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.live-video-container {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  background-color: #000;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+}
+
+.live-video {
+  width: 100%;
+  display: block;
 }
 
 .prompt-input {
@@ -119,7 +171,7 @@ body {
   border-color: var(--primary-color);
 }
 
-.analyze-button {
+.analyze-button, .capture-button {
   display: block;
   width: 100%;
   padding: 0.8rem 1rem;
@@ -147,6 +199,16 @@ body {
   cursor: not-allowed;
 }
 
+.capture-button {
+  background-color: var(--secondary-color);
+}
+
+.capture-button:hover:not(:disabled) {
+  background-color: #02bba9;
+}
+
+
+/* --- Results & History --- */
 .results-section h3 {
   font-weight: 500;
   color: var(--secondary-color);
@@ -201,6 +263,22 @@ body {
 .history-item-content h4 {
   color: var(--primary-color);
   margin-bottom: 0.25rem;
+}
+
+.history-audio-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 80px;
+  height: 80px;
+  background-color: #2a2a2a;
+  border-radius: var(--border-radius);
+}
+
+.history-audio-icon svg {
+  width: 40px;
+  height: 40px;
+  fill: var(--on-surface-color);
 }
 
 .loader {
