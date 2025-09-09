@@ -17,7 +17,10 @@ interface AnalysisResult {
 interface HistoryItem extends AnalysisResult {
   id: string;
   timestamp: string;
-  image: string; // base64 data URL
+  file: {
+    dataUrl: string; // base64 data URL
+    type: string; // e.g., 'image/jpeg', 'video/mp4'
+  };
   prompt: string;
 }
 
@@ -65,7 +68,7 @@ function App() {
 
   const handleAnalyze = async () => {
     if (!file) {
-      setError('Please upload a photo first.');
+      setError('Please upload a photo or video first.');
       return;
     }
 
@@ -77,17 +80,17 @@ function App() {
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       const base64Data = await fileToBase64(file);
 
-      const imagePart = {
+      const filePart = {
         inlineData: { mimeType: file.type, data: base64Data },
       };
       
-      const systemInstruction = "You are a specialized bulldog behavior expert. Analyze the provided image and text to identify bulldog behaviors. Provide a concise, plain-language explanation and a simple, actionable tip for the owner. Your response must be in JSON format.";
+      const systemInstruction = "You are a specialized bulldog behavior expert. Analyze the provided image or video and text to identify bulldog behaviors. Provide a concise, plain-language explanation and a simple, actionable tip for the owner. Your response must be in JSON format.";
 
-      const contents = `Analyze the bulldog's behavior in this image. Additional context from the owner: "${promptText || 'None'}".`;
+      const contents = `Analyze the bulldog's behavior in this image/video. Additional context from the owner: "${promptText || 'None'}".`;
 
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
-        contents: [{ role: 'user', parts: [imagePart, { text: contents }] }],
+        contents: [{ role: 'user', parts: [filePart, { text: contents }] }],
         config: {
           systemInstruction,
           responseMimeType: "application/json",
@@ -110,7 +113,10 @@ function App() {
         ...analysisResult,
         id: new Date().toISOString(),
         timestamp: new Date().toLocaleString(),
-        image: previewUrl!,
+        file: {
+          dataUrl: previewUrl!,
+          type: file.type,
+        },
         prompt: promptText,
       };
 
@@ -120,33 +126,42 @@ function App() {
 
     } catch (e) {
       console.error(e);
-      setError('Failed to analyze the image. Please try again.');
+      setError('Failed to analyze the media. Please try again.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const renderMedia = (file: { dataUrl: string; type: string; }, alt: string, className?: string) => {
+    if (file.type.startsWith('image/')) {
+      return _jsx("img", { src: file.dataUrl, alt: alt, className: className });
+    } else if (file.type.startsWith('video/')) {
+      return _jsx("video", { src: file.dataUrl, controls: true, className: className });
+    }
+    return null;
   };
 
   return (
     _jsx("div", { className: "app-container", children: [
       _jsxs("header", { className: "header", children: [
         _jsx("h1", { children: "Bulldog Behavior Interpreter" }),
-        _jsx("p", { children: "Upload a photo of your bulldog to understand their actions." })
+        _jsx("p", { children: "Upload a photo or video of your bulldog to understand their actions." })
       ] }),
       
       _jsx("main", { children: [
         _jsxs("section", { className: "card upload-section", children: [
-          _jsx("h2", { children: "1. Upload Photo" }),
-          _jsx("input", { type: "file", accept: "image/*", ref: fileInputRef, onChange: handleFileChange, "aria-hidden": "true" }),
+          _jsx("h2", { children: "1. Upload Media" }),
+          _jsx("input", { type: "file", accept: "image/*,video/*", ref: fileInputRef, onChange: handleFileChange, "aria-hidden": "true" }),
           _jsx("div", { 
             className: "upload-area", 
             onClick: () => fileInputRef.current?.click(),
             onKeyDown: (e) => { if (e.key === 'Enter') fileInputRef.current?.click(); },
             role: "button",
             tabIndex: 0,
-            "aria-label": "Upload a photo of your bulldog",
-            children: previewUrl
-              ? _jsx("img", { src: previewUrl, alt: "Bulldog preview", className: "image-preview" })
-              : _jsx("p", { className: "upload-instructions", children: "Click or tap here to select a photo" })
+            "aria-label": "Upload a photo or video of your bulldog",
+            children: previewUrl && file
+              ? renderMedia({ dataUrl: previewUrl, type: file.type }, "Bulldog preview", "preview-content")
+              : _jsx("p", { className: "upload-instructions", children: "Click or tap here to select a photo or video" })
           }),
           _jsx("textarea", {
             className: "prompt-input",
@@ -189,7 +204,7 @@ function App() {
             ? _jsx("p", { className: "placeholder", children: "Your analysis history is empty." })
             : _jsx("ul", { children: history.map(item => (
               _jsx("li", { className: "history-item", children: [
-                _jsx("img", { src: item.image, alt: `Analyzed bulldog - ${item.behavior}` }),
+                renderMedia(item.file, `Analyzed bulldog - ${item.behavior}`, "history-media"),
                 _jsxs("div", { className: "history-item-content", children: [
                   _jsx("h4", { children: item.behavior }),
                   _jsx("p", { children: `Analyzed on ${item.timestamp}` })

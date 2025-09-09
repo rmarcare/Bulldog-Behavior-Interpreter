@@ -75,6 +75,10 @@ body {
   text-align: center;
   cursor: pointer;
   transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 150px;
 }
 
 .upload-section .upload-area:hover {
@@ -90,7 +94,7 @@ body {
   color: var(--on-surface-color);
 }
 
-.image-preview {
+.preview-content {
   margin-top: 1rem;
   max-width: 100%;
   max-height: 300px;
@@ -186,11 +190,12 @@ body {
   border-bottom: none;
 }
 
-.history-item img {
+.history-media {
   width: 80px;
   height: 80px;
   object-fit: cover;
   border-radius: var(--border-radius);
+  background-color: #000;
 }
 
 .history-item-content h4 {
